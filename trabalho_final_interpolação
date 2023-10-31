@@ -1,0 +1,63 @@
+import sympy as sp
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define symbolic variable
+x = sp.symbols('x')
+
+x_data = np.array([2018, 2019, 2020, 2021,2022])
+y_data = np.array([14.71, 15.45, 17.75, 21.6, 25.6])
+
+# Define polynomial expressions
+def lagrange_polynomial(i):
+    numerator = 1
+    denominator = 1
+
+    for j in range(len(x_data)):
+        if i != j:
+            numerator *= (x - x_data[j])
+            denominator *= (x_data[i] - x_data[j])
+
+    p = numerator / denominator * y_data[i]
+    return p
+
+# Calculate the general expression
+general_expression = 0
+for i in range(len(x_data)):
+    general_expression += lagrange_polynomial(i)
+
+# Convert the general expression into a Python function
+polynomial_func = sp.lambdify(x, general_expression, 'numpy')
+
+# Values of x for the graph (more points for a smooth curve)
+x_values = np.linspace(2017, 2022, 500)
+y_values = polynomial_func(x_values)
+
+# Points where the curve passes through
+x_passa = np.array([2018, 2019, 2020, 2021, 2022])
+y_passa = [polynomial_func(x) for x in x_passa]
+
+# Plot the graph with the points where the curve passes through
+plt.figure(figsize=(10, 6))
+plt.plot(x_values, y_values, label='Polinômio interpolador')
+plt.scatter(x_passa, y_passa, color='red', label='Pontos observados')
+plt.xlabel('Ano')
+plt.ylabel('Capacidade instalada (GW)')
+plt.title('')
+plt.legend()
+plt.grid(True)
+plt.ylim(5, 30)  # Adjust the limits as needed
+
+# Move the legend to the upper left
+plt.legend(loc='upper left')
+
+# Add labels for y values at each passing point
+for i, txt in enumerate(y_passa):
+    plt.text(x_passa[i], txt, f'{y_data[i]:.2f}', ha='right', va='bottom')
+
+plt.show()
+
+# Print the simplified general expression
+simplified_expression = sp.simplify(general_expression)
+print("Simplified General Expression:")
+print(simplified_expression)
