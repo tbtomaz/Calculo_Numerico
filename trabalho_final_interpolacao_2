@@ -1,0 +1,63 @@
+import sympy as sp
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define symbolic variable
+x = sp.symbols('x')
+
+x_cap = np.array([14.75, 15.45, 21.6, 25.6])
+y_res = np.array([25.5, 28.8, 36.2, 41.5])
+
+# Define polynomial expressions
+def lagrange_polynomial(i):
+    numerator = 1
+    denominator = 1
+
+    for j in range(len(x_cap)):
+        if i != j:
+            numerator *= (x - x_cap[j])
+            denominator *= (x_cap[i] - x_cap[j])
+
+    p = numerator / denominator * y_res[i]
+    return p
+
+# Calculate the general expression
+general_expression = 0
+for i in range(len(x_cap)):
+    general_expression += lagrange_polynomial(i)
+
+# Convert the general expression into a Python function
+polynomial_func = sp.lambdify(x, general_expression, 'numpy')
+
+# Values of x for the graph (more points for a smooth curve)
+x_values_cap = np.linspace(14, 26, 500)
+y_values_res = polynomial_func(x_values_cap)
+
+# Points where the curve passes through
+x_passa_cap = np.array([14.75, 15.45, 21.6, 25.6])
+y_passa_res = [polynomial_func(x) for x in x_passa_cap]
+
+# Plot the graph with the points where the curve passes through
+plt.figure(figsize=(10, 6))
+plt.plot(x_values_cap, y_values_res, label='Polinômio interpolador')
+plt.scatter(x_passa_cap, y_passa_res, color='red', label='Pontos observados')
+plt.xlabel('Capacidade instalada - em Gigawatts')
+plt.ylabel('Média de residências abastecidas - em milhões')
+plt.title('')
+plt.legend()
+plt.grid(True)
+plt.ylim(15, 45)  # Adjust the limits as needed
+
+# Move the legend to the upper left
+plt.legend(loc='upper left')
+
+# Add labels for y values at each passing point
+for i, txt in enumerate(y_passa_res):
+    plt.text(x_passa_cap[i], txt, f'{y_res[i]:.2f}', ha='right', va='bottom')
+
+plt.show()
+
+# Print the simplified general expression
+simplified_expression = sp.simplify(general_expression)
+print("Simplified General Expression:")
+print(simplified_expression)
